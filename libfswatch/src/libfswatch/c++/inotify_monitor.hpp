@@ -27,6 +27,7 @@
 #  define FSW_INOTIFY_MONITOR_H
 
 #  include "monitor.hpp"
+#  include "../c/cevent.h"
 #  include <sys/inotify.h>
 #  include <string>
 #  include <vector>
@@ -79,9 +80,9 @@ namespace fsw
 
     void scan_root_paths();
     bool is_watched(const std::string& path) const;
-    void preprocess_dir_event(struct inotify_event *event);
+    void preprocess_dir_event(struct inotify_event *event, std::vector<fsw_event_flag>& flags);
+    void preprocess_node_event(struct inotify_event *event, std::vector<fsw_event_flag>& flags);
     void preprocess_event(struct inotify_event *event);
-    void preprocess_node_event(struct inotify_event *event);
     void scan(const std::string& path, const bool accept_non_dirs = true);
     bool add_watch(const std::string& path,
                    const struct stat& fd_stat);

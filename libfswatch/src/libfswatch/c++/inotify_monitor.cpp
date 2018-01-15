@@ -195,18 +195,11 @@ namespace fsw
     }
   }
 
-  void inotify_monitor::preprocess_dir_event(struct inotify_event *event)
+  void inotify_monitor::preprocess_dir_event(struct inotify_event *event, std::vector<fsw_event_flag>& flags)
   {
-    std::vector<fsw_event_flag> flags;
-
     if (event->mask & IN_ISDIR) flags.push_back(fsw_event_flag::IsDir);
     if (event->mask & IN_MOVE_SELF) flags.push_back(fsw_event_flag::Updated);
     if (event->mask & IN_UNMOUNT) flags.push_back(fsw_event_flag::PlatformSpecific);
-
-    if (flags.size())
-    {
-      impl->events.push_back({impl->wd_to_path[event->wd], impl->curr_time, flags});
-    }
 
     // If a new directory has been created, it should be rescanned if the
     if ((event->mask & IN_ISDIR) && (event->mask & IN_CREATE))
@@ -215,10 +208,8 @@ namespace fsw
     }
   }
 
-  void inotify_monitor::preprocess_node_event(struct inotify_event *event)
+  void inotify_monitor::preprocess_node_event(struct inotify_event *event, std::vector<fsw_event_flag>& flags)
   {
-    std::vector<fsw_event_flag> flags;
-
     if (event->mask & IN_ACCESS) flags.push_back(fsw_event_flag::PlatformSpecific);
     if (event->mask & IN_ATTRIB) flags.push_back(fsw_event_flag::AttributeModified);
     if (event->mask & IN_CLOSE_NOWRITE) flags.push_back(fsw_event_flag::PlatformSpecific);
@@ -320,8 +311,9 @@ namespace fsw
       notify_overflow(impl->wd_to_path[event->wd]);
     }
 
-    preprocess_dir_event(event);
-    preprocess_node_event(event);
+    vector<fsw_event_flag> flags;
+    preprocess_dir_event(event, flags);
+    preprocess_node_event(event, flags);
   }
 
   void inotify_monitor::remove_watch(int wd)
