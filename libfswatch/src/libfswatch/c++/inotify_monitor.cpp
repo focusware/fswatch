@@ -204,7 +204,15 @@ namespace fsw
     // If a new directory has been created, it should be rescanned if the
     if ((event->mask & IN_ISDIR) && (event->mask & IN_CREATE))
     {
-      impl->paths_to_rescan.push_back(impl->wd_to_path[event->wd]);
+      // Build the file name.
+      ostringstream filename_stream;
+      filename_stream << impl->wd_to_path[event->wd];
+      if (event->len > 1)
+      {
+        filename_stream << "/";
+        filename_stream << event->name;
+      }
+      impl->paths_to_rescan.push_back(filename_stream.str());
     }
   }
 
